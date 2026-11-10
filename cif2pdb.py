@@ -298,26 +298,33 @@ def readCIF(lines,pdb):
     return
 #
 #
+def readcif(filename):
+    pdb = {}
+    suffix = ".gz"
+    if filename.endswith(suffix):
+        with gzip.open(filename,'rt') as f:
+            alllines = f.read().split("\n")
+            alllines.pop()    
+    else:
+        with open(filename,'r') as f:
+            alllines = f.read().split("\n")
+            alllines.pop()
+
+    alllines = preprocess(alllines,filename)
+    readCIF(alllines,pdb)
+
+    return pdb
+
+#
+#
 if __name__ == "__main__":
     
     if len(sys.argv) != 3:
         print("%s   cif    output" % sys.argv[0],file=sys.stderr)
         exit ()
         
-    pdb = {}
-    suffix = ".gz"
-    if sys.argv[1].endswith(suffix):
-        with gzip.open(sys.argv[1],'rt') as f:
-            alllines = f.read().split("\n")
-            alllines.pop()    
-    else:
-        with open(sys.argv[1],'r') as f:
-            alllines = f.read().split("\n")
-            alllines.pop()
-
-    alllines = preprocess(alllines,sys.argv[1])
-    readCIF(alllines,pdb)
-
+    pdb = readcif(sys.argv[1])
+    
     with open(sys.argv[2],"x") as f:
         writeHEADER(pdb,sys.argv[1],f)
         ln = writeATOM(pdb,f)
